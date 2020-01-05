@@ -72,6 +72,8 @@ float translate_z = -3.0;
 
 float g_fAnim = 0.0;
 
+EEGStudy *rstudy;
+
 static const GLchar * vertex_shader_source [] = 
 {
 
@@ -86,10 +88,10 @@ static const GLchar * vertex_shader_source [] =
 	"{                                                            \n"
 	"	                                                          \n"
 	"   gl_Position = in_Position;                                \n"
-	"   gl_Position.x = sin(in_Position.x+time);                  \n"
-	"   gl_Position.y = cos(in_Position.y+time);                  \n"
-	"   gl_Position.z = cos(in_Position.z+time);                  \n"	
-	"   ex_fs_color = in_Color;                                   \n"
+//	"   gl_Position.x = sin(in_Position.x+time);                  \n"
+//	"   gl_Position.y = cos(in_Position.y+time);                  \n"
+//	"   gl_Position.z = cos(in_Position.z+time);                  \n"	
+	"   ex_fs_color = vec4(1.0, 0.0, 0.0, 1.0);                                   \n"
 	"}                                                            \n"
 };
 
@@ -153,6 +155,28 @@ void display()
  	g_fAnim += 0.0001f;
 }
 
+float ** makeVertices(short arry[], int numSignals, int numElems)
+{
+
+	float ** vertArry = (float **) malloc(numElems*sizeof(float **));
+	for (int i=0;i<numElems;i++)
+		vertArry[i] = (float *) malloc(4*sizeof(float*));
+
+	std::cout << "malloc successful!" << std::endl;
+
+	for (int j=0;j<numElems;j++)
+	{
+		std::cout << "j: " << j << std::endl;
+		vertArry[j][0] = (float)j/256.0f;
+		vertArry[j][1] = (float) arry[j]/256.0f;
+		vertArry[j][2] = 0.0f;
+		vertArry[j][3] = 1.0f;
+	}
+
+	return vertArry;
+
+}
+
 void createVBO(void)
 {
 	GLfloat vertices[] = {
@@ -177,14 +201,22 @@ void createVBO(void)
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, 256);
+
+	for (int i=0;i<256;i++)
+		std::cout << "d: " << d[i][1] << std::endl;
+
+//	glBufferData(GL_ARRAY_BUFFER, 256*sizeof(float), (GLfloat *) d, GL_STATIC_DRAW);
+
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
+	// glGenBuffers(1, &colorBuffer);
+	// glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+	// glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	// glEnableVertexAttribArray(1);
 
 	errorCheckValue = glGetError();
 
@@ -531,7 +563,7 @@ bool initGL(int *argc, char **argv)
 int main(int argc, char **argv)
 {
 
-	EEGStudy *rstudy = loadEDFfile("00000000_s001_t000.edf", false);
+	rstudy = loadEDFfile("00000000_s001_t000.edf", false);
 
 	std::cout << "Inside main..." << std::endl;
 	
