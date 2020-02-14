@@ -88,10 +88,11 @@ static const GLchar * vertex_shader_source [] =
 	"{                                                            \n"
 	"	                                                          \n"
 	"   gl_Position = in_Position;                                \n"
-//	"   gl_Position.x = sin(in_Position.x+time);                  \n"
-//	"   gl_Position.y = cos(in_Position.y+time);                  \n"
-//	"   gl_Position.z = cos(in_Position.z+time);                  \n"	
-	"   ex_fs_color = vec4(1.0, 0.0, 0.0, 1.0);                                   \n"
+	// "   gl_Position.x = sin(in_Position.x+time);                  \n"
+	// "   gl_Position.y = cos(in_Position.y+time);                  \n"
+	// "   gl_Position.z = cos(in_Position.z+time);                  \n"	
+//	"   ex_fs_color = vec4(abs(cos(in_Position.x+time)), abs(sin(in_Position.y+time)), abs(sin(in_Position.z+time)), 1.0-abs(sin(in_Position.z+time)) );                   \n"
+	"	ex_fs_color = vec4(1.0, 0.0, 0.0, 1.0);                   \n"
 	"}                                                            \n"
 };
 
@@ -142,12 +143,11 @@ void display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glViewport(0, 0, window_width*0.5f, window_height*0.5f);
-
+	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
 	glDrawArrays(GL_LINE_STRIP, 0, 4);
 
-	glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
-	glDrawArrays(GL_LINE_STRIP, 0, 4);
+	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
+	// glDrawArrays(GL_LINE_STRIP, 0, 4);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -166,11 +166,12 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 
 	for (int j=0;j<numElems;j++)
 	{
-		std::cout << "j: " << j << std::endl;
-		vertArry[j][0] = (float)j/256.0f;
-		vertArry[j][1] = (float) arry[j]/256.0f;
+		// std::cout << "j: " << j << std::endl;
+		vertArry[j][0] = (float)j/(float)numElems;
+		vertArry[j][1] = (float) arry[j]/(float)numElems;
 		vertArry[j][2] = 0.0f;
 		vertArry[j][3] = 1.0f;
+		// std::cout << "j: " << j << " vertArry (x,y): (" << vertArry[j][0] << ", " << vertArry[j][1] << ")" << std::endl;
 	}
 
 	return vertArry;
@@ -200,16 +201,50 @@ void createVBO(void)
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, 256);
+	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, 256*8);
 
-	for (int i=0;i<256;i++)
-		std::cout << "d: " << d[i][1] << std::endl;
+	GLfloat *dpoints = (GLfloat*)malloc(256*8*4*sizeof(GLfloat));
 
-//	glBufferData(GL_ARRAY_BUFFER, 256*sizeof(float), (GLfloat *) d, GL_STATIC_DRAW);
+	for (int i=0;i<256*8;i++)
+		for (int j=0;j<4;j++)
+		{
+			dpoints[(i*4)+j] = d[i][j];
+			// std::cout << "dpoints[%d*4+%d]: " << dpoints[(i*4)+j] << std::endl;
+		}
+
+	glBufferData(GL_ARRAY_BUFFER, 8*256*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
+
+	errorCheckValue = glGetError();
+
+	if (errorCheckValue != GL_NO_ERROR)
+	{
+		fprintf(stderr,
+			"ERROR: glBufferData failed: %s \n",
+			gluErrorString(errorCheckValue)
+		);
+		exit(-1);
+	}
+	else
+		std::cout << "glBufferData successful." << std::endl;
 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	errorCheckValue = glGetError();
+
+	if (errorCheckValue != GL_NO_ERROR)
+	{
+		fprintf(stderr,
+			"ERROR: glVertexAttribPointer failed: %s \n",
+			gluErrorString(errorCheckValue)
+		);
+		exit(-1);
+	}
+	else
+		std::cout << "glVertexAttribPointer successful." << std::endl;
+
+
 	glEnableVertexAttribArray(0);
 
 	// glGenBuffers(1, &colorBuffer);
@@ -223,11 +258,14 @@ void createVBO(void)
 	if (errorCheckValue != GL_NO_ERROR)
 	{
 		fprintf(stderr,
-			"ERROR: Could not create a VBO: %s \n",
+			"ERROR: glEnableVertexAttribArray: %s \n",
 			gluErrorString(errorCheckValue)
 		);
 		exit(-1);
 	}
+	else
+		std::cout << "glEnableVertexAttribArray successful." << std::endl;
+
 }
 
 void destroyVBO(void)
