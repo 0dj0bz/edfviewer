@@ -40,7 +40,7 @@ const unsigned int mesh_height   = 512;
 
 const char * appString = "EDF Viewer v0.1";
 
-const unsigned int numVertices   = 1024;
+const unsigned int numVertices =  8192;
 
 
 // Auto-Verification Code
@@ -171,7 +171,7 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 	for (int j=0;j<numElems;j++)
 	{
 		// std::cout << "j: " << j << std::endl;
-		vertArry[j][0] = ((float)(j<numElems?j-(numElems/2):j+(numElems/2))/((float)numElems/(float)mesh_width))/(float)mesh_width;
+		vertArry[j][0] = ((float)(j<numElems?j-(numElems/2):j+(numElems/2))/((float)numElems/2));//(float)mesh_width))/(float)mesh_width;
 		vertArry[j][1] = (float) arry[j] / 4096;
 		vertArry[j][2] = 0.0f;
 		vertArry[j][3] = 1.0f;
