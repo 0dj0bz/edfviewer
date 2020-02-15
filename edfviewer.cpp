@@ -32,15 +32,15 @@ struct vec4
 // GLOBAL VARIABLES
 long g_errorCount = 0;
 // constants
-const unsigned int window_width  = 512;
+const unsigned int window_width  = 1024;
 const unsigned int window_height = 512;
 
-const unsigned int mesh_width    = 256;
-const unsigned int mesh_height   = 256;
+const unsigned int mesh_width    = 1024;
+const unsigned int mesh_height   = 512;
 
 const char * appString = "EDF Viewer v0.1";
 
-const unsigned int numVertices   = 256;
+const unsigned int numVertices   = 1024;
 
 
 // Auto-Verification Code
@@ -145,7 +145,7 @@ void display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
-	glDrawArrays(GL_LINE_STRIP, 0, 256);
+	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
 
 	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
 	// glDrawArrays(GL_LINE_STRIP, 0, 4);
@@ -171,7 +171,7 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 	for (int j=0;j<numElems;j++)
 	{
 		// std::cout << "j: " << j << std::endl;
-		vertArry[j][0] = ((float)j/((float)numElems/(float)mesh_width))/(float)mesh_width;
+		vertArry[j][0] = ((float)(j<numElems?j-(numElems/2):j+(numElems/2))/((float)numElems/(float)mesh_width))/(float)mesh_width;
 		vertArry[j][1] = (float) arry[j] / 4096;
 		vertArry[j][2] = 0.0f;
 		vertArry[j][3] = 1.0f;
