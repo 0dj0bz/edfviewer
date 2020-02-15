@@ -40,6 +40,7 @@ const unsigned int mesh_height   = 256;
 
 const char * appString = "EDF Viewer v0.1";
 
+const unsigned int numVertices   = 256;
 
 
 // Auto-Verification Code
@@ -144,7 +145,7 @@ void display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
-	glDrawArrays(GL_LINE_STRIP, 0, 4);
+	glDrawArrays(GL_LINE_STRIP, 0, 256);
 
 	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
 	// glDrawArrays(GL_LINE_STRIP, 0, 4);
@@ -164,14 +165,17 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 
 	std::cout << "malloc successful!" << std::endl;
 
+
+	// std::cout << "max: " << rstudy->signals[0].digiMaximum << " min: " << rstudy->signals[0].digiMinimum << std::endl;
+
 	for (int j=0;j<numElems;j++)
 	{
 		// std::cout << "j: " << j << std::endl;
-		vertArry[j][0] = (float)j/(float)numElems;
-		vertArry[j][1] = (float) arry[j]/(float)numElems;
+		vertArry[j][0] = ((float)j/((float)numElems/(float)mesh_width))/(float)mesh_width;
+		vertArry[j][1] = (float) arry[j] / 4096;
 		vertArry[j][2] = 0.0f;
 		vertArry[j][3] = 1.0f;
-		// std::cout << "j: " << j << " vertArry (x,y): (" << vertArry[j][0] << ", " << vertArry[j][1] << ")" << std::endl;
+		std::cout << "j: " << j << " vertArry (x,y): (" << vertArry[j][0] << ", " << vertArry[j][1] << ")" << std::endl;
 	}
 
 	return vertArry;
@@ -180,19 +184,19 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 
 void createVBO(void)
 {
-	GLfloat vertices[] = {
-		-0.2f, -0.2f, 0.0f, 1.0f,
-		 0.0f,  0.2f, 0.0f, 1.0f,
-		 0.2f, -0.2f, 0.0f, 1.0f,
-		-0.2f, -0.2f, 0.0f, 1.0f
-	};
+	// GLfloat vertices[] = {
+	// 	-0.2f, -0.2f, 0.0f, 1.0f,
+	// 	 0.0f,  0.2f, 0.0f, 1.0f,
+	// 	 0.2f, -0.2f, 0.0f, 1.0f,
+	// 	-0.2f, -0.2f, 0.0f, 1.0f
+	// };
 
-	GLfloat colors[] = {
-		1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f,
-	};
+	// GLfloat colors[] = {
+	// 	1.0f, 0.0f, 1.0f, 1.0f,
+	// 	1.0f, 1.0f, 0.0f, 1.0f,
+	// 	0.0f, 1.0f, 1.0f, 1.0f,
+	// 	1.0f, 0.0f, 1.0f, 1.0f,
+	// };
 
 	GLenum errorCheckValue = glGetError();
 
@@ -203,18 +207,18 @@ void createVBO(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, 256*8);
+	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
 
-	GLfloat *dpoints = (GLfloat*)malloc(256*8*4*sizeof(GLfloat));
+	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
 
-	for (int i=0;i<256*8;i++)
+	for (int i=0;i<numVertices;i++)
 		for (int j=0;j<4;j++)
 		{
 			dpoints[(i*4)+j] = d[i][j];
 			// std::cout << "dpoints[%d*4+%d]: " << dpoints[(i*4)+j] << std::endl;
 		}
 
-	glBufferData(GL_ARRAY_BUFFER, 8*256*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numVertices*4*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
 
 	errorCheckValue = glGetError();
 
@@ -601,7 +605,7 @@ bool initGL(int *argc, char **argv)
 int main(int argc, char **argv)
 {
 
-	rstudy = loadEDFfile("00000000_s001_t000.edf", false);
+	rstudy = loadEDFfile("00000000_s001_t000.edf", true);
 
 	std::cout << "Inside main..." << std::endl;
 	
