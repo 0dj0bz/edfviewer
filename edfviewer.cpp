@@ -40,7 +40,7 @@ const unsigned int mesh_height   = 512;
 
 const char * appString = "EDF Viewer v0.1";
 
-const unsigned int numVertices =  8192;
+const unsigned int numVertices =  256;
 
 
 // Auto-Verification Code
@@ -74,6 +74,9 @@ float translate_z = -3.0;
 float g_fAnim = 0.0;
 
 EEGStudy *rstudy;
+
+
+unsigned int bufIter = 0;
 
 static const GLchar * vertex_shader_source [] = 
 {
@@ -132,30 +135,6 @@ static const GLchar * fragment_shader_source [] =
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-//! Display callback
-////////////////////////////////////////////////////////////////////////////////
-void display()
-{
-	++frameCount;
-
-
-	glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
-	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
-
-	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
-	// glDrawArrays(GL_LINE_STRIP, 0, 4);
-
-	glutSwapBuffers();
-	glutPostRedisplay();
-
- 	g_fAnim += 0.0001f;
-}
-
 float ** makeVertices(short arry[], int numSignals, int numElems)
 {
 
@@ -166,7 +145,11 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 	std::cout << "malloc successful!" << std::endl;
 
 
-	// std::cout << "max: " << rstudy->signals[0].digiMaximum << " min: " << rstudy->signals[0].digiMinimum << std::endl;
+	// TODO :
+	// Apparently I have somehow put a map inside of a map when creating the
+	// signals component of the EDFStudy data structure. Need to fix this.
+
+	std::cout << "max: " << rstudy->signals[0][0].digiMaximum << " min: " << rstudy->signals[0][0].digiMinimum << std::endl;
 
 	for (int j=0;j<numElems;j++)
 	{
@@ -182,21 +165,46 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//! Display callback
+////////////////////////////////////////////////////////////////////////////////
+void display()
+{
+	++frameCount;
+
+	float **d = makeVertices(&rstudy->signalData->data[0][256+bufIter], 30, numVertices);
+
+	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+
+	for (int i=0;i<numVertices;i++)
+		for (int j=0;j<4;j++)
+		{
+			dpoints[(i*4)+j] = d[i][j];
+		}
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
+	glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
+	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
+
+	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
+	// glDrawArrays(GL_LINE_STRIP, 0, 4);
+
+	glutSwapBuffers();
+	glutPostRedisplay();
+
+	bufIter++;
+
+ 	g_fAnim += 0.0001f;
+}
+
+
 void createVBO(void)
 {
-	// GLfloat vertices[] = {
-	// 	-0.2f, -0.2f, 0.0f, 1.0f,
-	// 	 0.0f,  0.2f, 0.0f, 1.0f,
-	// 	 0.2f, -0.2f, 0.0f, 1.0f,
-	// 	-0.2f, -0.2f, 0.0f, 1.0f
-	// };
-
-	// GLfloat colors[] = {
-	// 	1.0f, 0.0f, 1.0f, 1.0f,
-	// 	1.0f, 1.0f, 0.0f, 1.0f,
-	// 	0.0f, 1.0f, 1.0f, 1.0f,
-	// 	1.0f, 0.0f, 1.0f, 1.0f,
-	// };
 
 	GLenum errorCheckValue = glGetError();
 
@@ -205,7 +213,6 @@ void createVBO(void)
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
 
@@ -215,7 +222,6 @@ void createVBO(void)
 		for (int j=0;j<4;j++)
 		{
 			dpoints[(i*4)+j] = d[i][j];
-			// std::cout << "dpoints[%d*4+%d]: " << dpoints[(i*4)+j] << std::endl;
 		}
 
 	glBufferData(GL_ARRAY_BUFFER, numVertices*4*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
@@ -250,12 +256,6 @@ void createVBO(void)
 
 
 	glEnableVertexAttribArray(0);
-
-	// glGenBuffers(1, &colorBuffer);
-	// glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-	// glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	// glEnableVertexAttribArray(1);
 
 	errorCheckValue = glGetError();
 
