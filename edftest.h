@@ -119,6 +119,22 @@ public:
 		this->signals = sigList;
 		this->signalData = sigData;
 	}
+
+	short * getSegment(int sigNum, float startTime, float endTime)
+	{
+
+		int freq = stoi(this->signals[0][sigNum].numSamples) / stoi(this->header->recDuration);
+
+		int startPos = freq * startTime;
+		int endPos = freq * endTime;
+
+		short * sel = new short[(endPos-startPos)+1];
+
+		memcpy(sel, &this->signalData->data[sigNum][startPos], (endPos-startPos)+1);
+
+		return(sel);
+
+	}
 };
 
 enum FileType {EDF, EDFPLUS};
@@ -129,20 +145,29 @@ std::map<int, EDFSignal> signalList;
 EDFData * data;
 
 
-EEGStudy * loadEDFfile(const char * fn=NULL, bool verbose=false)
+EEGStudy * loadEDFfile(string fn, bool verbose=false)
 {
 	
-	if (fn == NULL)
-	{
-		cout << "Usage: edftest <filename>" << endl;
-		exit(-1);
-	}
+	// if (fn == NULL)
+	// {
+	// 	cout << "Usage: edftest <filename>" << endl;
+	// 	exit(-1);
+	// }
 
-	FILE* f = fopen(fn, "r");
+	FILE* f = fopen(fn.c_str(), "r");
+
+	if (f == NULL)
+	{
+
+		std::cout << "Error opening file - ABORTING." << std::endl;
+		return(NULL);
+	}
+	else
+		std::cout << "File opened successfully." << std::endl;
 
 	// Process the fixed part of the header (first 256 bytes)
  
-    fread(&hdr, sizeof hdr, 1, f);
+    fread(&hdr, sizeof(hdr), 1, f);
 
     header = new EDFHeader();
 

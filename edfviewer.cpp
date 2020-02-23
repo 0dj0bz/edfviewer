@@ -173,26 +173,39 @@ void display()
 {
 	++frameCount;
 
-	float **d = makeVertices(&rstudy->signalData->data[0][256+bufIter], 30, numVertices);
+	// float **d = makeVertices(&rstudy->signalData->data[0][256+bufIter], 30, numVertices);
 
-	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+	// GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
 
-	for (int i=0;i<numVertices;i++)
-		for (int j=0;j<4;j++)
-		{
-			dpoints[(i*4)+j] = d[i][j];
-		}
+	// for (int i=0;i<numVertices;i++)
+	// 	for (int j=0;j<4;j++)
+	// 	{
+	// 		dpoints[(i*4)+j] = d[i][j];
+	// 	}
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
-	glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
+	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
+	// glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// glViewport(0, 0, window_width*0.5f, window_height*0.5f);
+	glViewport(0, 0, window_width, window_height*0.5f);
 	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
 
-	// glViewport(window_width*0.5f, window_height*0.5f, (window_width*0.5f), (window_height*0.5f));
-	// glDrawArrays(GL_LINE_STRIP, 0, 4);
+
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// d = makeVertices(&rstudy->signalData->data[1][256+bufIter], 30, numVertices);
+
+	// GLfloat *dpoints2 = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+
+	// for (int i=0;i<numVertices;i++)
+	// 	for (int j=0;j<4;j++)
+	// 	{
+	// 		dpoints2[(i*4)+j] = d[i][j];
+	// 	}
+
+	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints2);
+
+	// glViewport(0, window_height*0.5f, window_width, (window_height*0.5f));
+	// glDrawArrays(GL_LINE_STRIP, 0, numVertices);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -214,7 +227,11 @@ void createVBO(void)
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+
+	//short * selection = rstudy->getSegment(0, 1.0, 3.0);
+
 	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
+	//float **d = makeVertices(selection, 30, numVertices);
 
 	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
 
@@ -605,7 +622,16 @@ bool initGL(int *argc, char **argv)
 int main(int argc, char **argv)
 {
 
-	rstudy = loadEDFfile("00000000_s001_t000.edf", true);
+	string filename = "00000000_s001_t000.edf";
+
+
+	rstudy = loadEDFfile(filename, false);
+
+	if (rstudy == NULL)
+	{
+		std::cout << "Error opening file - ABORTING." << std::endl;
+		exit(-1);
+	}
 
 	std::cout << "Inside main..." << std::endl;
 	
