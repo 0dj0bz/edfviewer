@@ -173,6 +173,8 @@ void display()
 {
 	++frameCount;
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	// float **d = makeVertices(&rstudy->signalData->data[0][256+bufIter], 30, numVertices);
 
 	// GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
@@ -186,11 +188,25 @@ void display()
 	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
 	// glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
 
+	short * selection = rstudy->getSegment(0, g_fAnim+0.0, g_fAnim+3.0);
+
+	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
+	float **d = makeVertices(selection, 30, numVertices);
+
+	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+
+	for (int i=0;i<numVertices;i++)
+		for (int j=0;j<4;j++)
+		{
+			dpoints[(i*4)+j] = d[i][j];
+		}
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
+
 	glViewport(0, 0, window_width, window_height*0.5f);
 	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
 
 
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// d = makeVertices(&rstudy->signalData->data[1][256+bufIter], 30, numVertices);
 
@@ -212,7 +228,7 @@ void display()
 
 	bufIter++;
 
- 	g_fAnim += 0.0001f;
+ 	g_fAnim += 0.001f;
 }
 
 
@@ -228,10 +244,10 @@ void createVBO(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
-	//short * selection = rstudy->getSegment(0, 1.0, 3.0);
+	short * selection = rstudy->getSegment(0, 0.0, 3.0);
 
-	float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
-	//float **d = makeVertices(selection, 30, numVertices);
+	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
+	float **d = makeVertices(selection, 30, numVertices);
 
 	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
 
