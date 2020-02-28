@@ -120,7 +120,7 @@ public:
 		this->signalData = sigData;
 	}
 
-	short * getSegment(int sigNum, float startTime, float endTime)
+	int getSegment(short ** dst, int sigNum, float startTime, float endTime)
 	{
 
 		int freq = stoi(this->signals[0][sigNum].numSamples) / stoi(this->header->recDuration);
@@ -128,11 +128,33 @@ public:
 		int startPos = freq * startTime;
 		int endPos = freq * endTime;
 
-		short * sel = new short[(endPos-startPos)+1];
+		// std::cout << "About to create dst array...";
+		
+		*dst = (short *)malloc((endPos-startPos)*sizeof(short));
 
-		memcpy(sel, &this->signalData->data[sigNum][startPos], (endPos-startPos)+1);
+		// if (*dst != NULL)
+		// 	std::cout << "SUCCESS!" << std::endl;
+		// else
+		// {
+		// 	std::cout << "FAILED!" << std::endl;
+		// 	return(-1);
+		// }
 
-		return(sel);
+		// std::cout << "About to copy data to dst array...";
+
+		*dst = (short *) memcpy(*dst, &this->signalData->data[sigNum][startPos], 
+			(endPos-startPos)*sizeof(short));
+
+		// std::cout << "SUCCESS! Copied " << (endPos-startPos) << " values." << std::endl;
+
+		// std::cout << "Num samples in segment: " << (endPos-startPos) << std::endl;
+		// std::cout << "Data: " << std::endl;
+
+		// for (int i=0;i<(endPos-startPos);i++)
+		// 	std::cout << "dst[" << i << "]: " << dst[0][i] << std::endl;
+
+
+		return((endPos-startPos));
 
 	}
 };
@@ -396,6 +418,8 @@ EEGStudy * loadEDFfile(string fn, bool verbose=false)
 		    for (int i=0;i<stoi(study->header->numDataRecs);i++)
 		    	cout << "Signal[" << j << "] Data Record[" << i << "]\t - " << study->signalData->data[j][i] << endl;
 	}
+
+	fclose(f);
 
 	return study;
 }
