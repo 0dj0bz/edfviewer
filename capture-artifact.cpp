@@ -63,7 +63,14 @@ int main(int argc, char **argv)
 		exit(-2);
 	}
 
+	std::cout << "File duration (s) : " << stoi(rstudy->header->numDataRecs) * stoi(rstudy->header->recDuration) << std::endl;
 	short * data; 
+
+	if (startpos - 1.0f > 0.0f)
+		startpos -= 1.0f;
+
+	if (endpos +1.0f < stof(rstudy->header->recDuration)*stof(rstudy->header->numDataRecs))
+		endpos += 1.0f;
 
 	int numsamples = rstudy->getSegment(&data, channel, startpos, endpos);
 
@@ -76,6 +83,9 @@ int main(int argc, char **argv)
  	artheader.channel = channel;
 	artheader.numsamples = numsamples;
 	strcpy(artheader.label, artlabel.c_str());
+
+	std::cout << "Writing file: " << dstfile << " channel: " << channel << " numsamples: " << numsamples <<
+		" startpos: " << startpos << " endpos: " << endpos << std::endl;
 
 	FILE *fp = fopen(dstfile.c_str(), "wb");
 	// first, write the header

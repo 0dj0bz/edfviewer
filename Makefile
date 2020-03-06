@@ -256,8 +256,8 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I../glew-2.1.0/include/GL
-LIBRARIES := -I../glew-2.1.0/lib
+INCLUDES  := -I/usr/include/GL/
+LIBRARIES := -I/usr/lib64
 
 ################################################################################
 
@@ -303,7 +303,7 @@ endif
 # Target rules
 all: build
 
-build: edfviewer
+build: edfviewer view-snippet
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -312,19 +312,26 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-edfviewer.o:edfviewer.cpp
+edfviewer.o : edfviewer.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-edfviewer: edfviewer.o
+edfviewer : edfviewer.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 #	$(EXEC) mkdir -p ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 #	$(EXEC) cp $@ ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
+
+view-snippet.o : view-snippet.cpp
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+view-snippet : view-snippet.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
 	$(EXEC) ./edfviewer
 
 clean:
 	rm -f edfviewer edfviewer.o
+	rm -f view-snippet view-snippet.o
 #	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/edfviewer
 
 clobber: clean
