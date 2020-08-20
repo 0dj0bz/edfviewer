@@ -1,3 +1,5 @@
+
+#include <cstring>
 #include "edftest.h"
 
 int main(int argc, char const *argv[])

@@ -1,1 +1,1 @@
-/media/robabbott/NEDC/capture-artifact-window.sh
+/media/robabbott/eeg-work/capture-artifact-window.sh

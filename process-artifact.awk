@@ -1,1 +1,1 @@
-/media/robabbott/NEDC/process-artifact.awk
+/media/robabbott/eeg-work/process-artifact.awk

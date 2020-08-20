@@ -5,12 +5,13 @@
 #include <string.h>
 #include "edftest.h"
 
-struct EEGArtifactV1
+struct EEGArtifactV2
 {
-	char version[20] = "EEGArtifactV1";
+	char version[20] = "EEGArtifactV2";
 	int channel;
 	int numsamples;
 	char label[255];
+	EDF_SIGNAL signalMetadata;
 } artheader;
 
 
@@ -55,7 +56,8 @@ int main(int argc, char **argv)
 	std::cout << "Opening filename: " << edfsrcfile << std::endl;
 
 
-	rstudy = loadEDFfile(edfsrcfile, false);
+	rstudy = new EEGStudy();
+	rstudy->loadEDFfile(edfsrcfile, false);
 
 	if (rstudy == NULL)
 	{
@@ -71,8 +73,9 @@ int main(int argc, char **argv)
 
 	if (endpos +1.0f < stof(rstudy->header->recDuration)*stof(rstudy->header->numDataRecs))
 		endpos += 1.0f;
-
-	int numsamples = rstudy->getSegment(&data, channel, startpos, endpos);
+	
+	// data is a short *; getSegment should return the address to the slice of the array containing requested segment of data  
+	int numsamples = rstudy->getSegment(data, channel, startpos, endpos);
 
 	std::cout << "Num samples in segment: " << numsamples << std::endl;
 	// std::cout << "Data: " << std::endl;
@@ -84,39 +87,60 @@ int main(int argc, char **argv)
 	artheader.numsamples = numsamples;
 	strcpy(artheader.label, artlabel.c_str());
 
+	std::cout << "about to invoke copy operator..." << std::endl;
+	assign(&artheader.signalMetadata, rstudy->signals[channel]);
+	std::cout << "copy complete!" << std::endl;
+
 	std::cout << "Writing file: " << dstfile << " channel: " << channel << " numsamples: " << numsamples <<
 		" startpos: " << startpos << " endpos: " << endpos << std::endl;
 
 	FILE *fp = fopen(dstfile.c_str(), "wb");
 	// first, write the header
-	fwrite(&artheader, sizeof(EEGArtifactV1), 1, fp );
+	fwrite(&artheader, sizeof(EEGArtifactV2), 1, fp );
 	//now write the data, an array of shorts
 	fwrite(data, sizeof(short), numsamples, fp);
 
 	fflush(fp);
 	fclose(fp);
 
-	//now let's read it back in to see if it worked
-	// EEGArtifactV1 test;
 
-	// fp = fopen(dstfile.c_str(), "rb");
-	// fread(&test, sizeof(EEGArtifactV1), 1, fp);
-	// short indata[numsamples];
-	// fread(indata, sizeof(short), numsamples, fp);
-	// fclose(fp);
-
-	// std::cout << "Header Data" << std::endl;
-	// std::cout << "Version    : " << test.version << std::endl;
-	// std::cout << "Channel    : " << test.channel << std::endl;
-	// std::cout << "Label      : " << test.label << std::endl;
-	// std::cout << "Numsamples : " << test.numsamples << std::endl << std::endl;
-
-	// for (int i=0;i<numsamples;i++)
-	// 	std::cout << "indata[" << i << "]: " << indata[i] << std::endl;
-
-	// free the array of data
 	free(data);
 
+	//now let's read it back in to see if it worked
+	EEGArtifactV2 test;
+
+	fp = fopen(dstfile.c_str(), "rb");
+	fread(&test, sizeof(EEGArtifactV2), 1, fp);
+	short indata[numsamples];
+	fread(indata, sizeof(short), numsamples, fp);
+	fclose(fp);
+
+	std::cout << "Header Data" << std::endl;
+	std::cout << "Version    : " << test.version << std::endl;
+	std::cout << "Channel    : " << test.channel << std::endl;
+	std::cout << "Label      : " << test.label << std::endl;
+	std::cout << "Numsamples : " << test.numsamples << std::endl << std::endl;
+
+	std::cout << "metadata label          : " << test.signalMetadata.label << std::endl;
+	std::cout << "metadata transducerType : " << test.signalMetadata.transducerType << std::endl;
+	std::cout << "metadata physDimension  : " << test.signalMetadata.physDimension << std::endl;
+	std::cout << "metadata physMinimum    : " << test.signalMetadata.physMinimum << std::endl;
+	std::cout << "metadata physMaximum    : " << test.signalMetadata.physMaximum << std::endl;
+	std::cout << "metadata digiMinimum    : " << test.signalMetadata.digiMinimum << std::endl;
+	std::cout << "metadata digiMaximum    : " << test.signalMetadata.digiMaximum << std::endl;
+	std::cout << "metadata prefilter      : " << test.signalMetadata.prefilter << std::endl;
+	std::cout << "metadata numSamples     : " << test.signalMetadata.numSamples << std::endl;
+	std::cout << "metadata reserved       : " << test.signalMetadata.reserved << std::endl;
+	for (int i=0;i<numsamples;i++)
+		std::cout << "indata[" << i << "]: " << indata[i] << std::endl;
+
 	std::cout << "Success! - exiting." << std::endl;
+	
+	if (data)
+	{
+//		free(data);
+		data = NULL;
+	}	
+
 	return(0);
 }
