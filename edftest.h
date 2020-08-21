@@ -252,7 +252,7 @@ public:
 		
 		free(this->signalData);
 
-		free(this->header);
+		delete this->header;
 
 	};
 
@@ -339,7 +339,7 @@ public:
 		 	return(-1);
 		}
 
-		return((endPos-startPos+1));
+		return((endPos-startPos));
 
 	}
 
