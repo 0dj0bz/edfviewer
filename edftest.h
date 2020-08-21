@@ -315,7 +315,7 @@ public:
 				// the ceil() of the endTime to make the processing easier. we may come back later and
 				// implement partial record ranges. - rla 2020/08/18
 
-				std::cout << "EEGStudy::getSegment - about to copy data to dst array..." << std::endl;
+				//std::cout << "EEGStudy::getSegment - about to copy data to dst array..." << std::endl;
 
 				int startRecord = floor(startTime)/stol(this->header->recDuration);
 
@@ -327,10 +327,10 @@ public:
 
 				curRec++;
 
-				std::cout << "EEGStudy::getSegment - SUCCESS! Copied " << (endPos-startPos) << " values." 
-					<< std::endl;
+				//std::cout << "EEGStudy::getSegment - SUCCESS! Copied " << (endPos-startPos) << " values." 
+					//<< std::endl;
 
-			 	std::cout << "EEGStudy::getSegment - samples remaining: " << samplesToCopy << std::endl; 
+			 	//std::cout << "EEGStudy::getSegment - samples remaining: " << samplesToCopy << std::endl; 
 			}
 		}	
 		else

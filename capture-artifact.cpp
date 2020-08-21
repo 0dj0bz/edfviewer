@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 
 	EEGStudy *rstudy;
 
+	std::cout << "----------------------------------------------------------------------------------" << std::endl;
 	std::cout << "Opening filename: " << edfsrcfile << std::endl;
 
 
@@ -65,7 +66,7 @@ int main(int argc, char **argv)
 		exit(-2);
 	}
 
-	std::cout << "File duration (s) : " << stoi(rstudy->header->numDataRecs) * stoi(rstudy->header->recDuration) << std::endl;
+	//std::cout << "File duration (s) : " << stoi(rstudy->header->numDataRecs) * stoi(rstudy->header->recDuration) << std::endl;
 	short * data; 
 
 	if (startpos - 1.0f > 0.0f)
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
 	// data is a short *; getSegment should return the address to the slice of the array containing requested segment of data  
 	int numsamples = rstudy->getSegment(data, channel, startpos, endpos);
 
-	std::cout << "Num samples in segment: " << numsamples << std::endl;
+	//std::cout << "Num samples in segment: " << numsamples << std::endl;
 	// std::cout << "Data: " << std::endl;
 
 	// for (int i=0;i<numsamples;i++)
@@ -87,9 +88,9 @@ int main(int argc, char **argv)
 	artheader.numsamples = numsamples;
 	strcpy(artheader.label, artlabel.c_str());
 
-	std::cout << "about to invoke copy operator..." << std::endl;
+	//std::cout << "about to invoke copy operator..." << std::endl;
 	assign(&artheader.signalMetadata, rstudy->signals[channel]);
-	std::cout << "copy complete!" << std::endl;
+	//std::cout << "copy complete!" << std::endl;
 
 	std::cout << "Writing file: " << dstfile << " channel: " << channel << " numsamples: " << numsamples <<
 		" startpos: " << startpos << " endpos: " << endpos << std::endl;
@@ -120,7 +121,7 @@ int main(int argc, char **argv)
 	std::cout << "Channel    : " << test.channel << std::endl;
 	std::cout << "Label      : " << test.label << std::endl;
 	std::cout << "Numsamples : " << test.numsamples << std::endl << std::endl;
-
+/*
 	std::cout << "metadata label          : " << test.signalMetadata.label << std::endl;
 	std::cout << "metadata transducerType : " << test.signalMetadata.transducerType << std::endl;
 	std::cout << "metadata physDimension  : " << test.signalMetadata.physDimension << std::endl;
@@ -133,14 +134,17 @@ int main(int argc, char **argv)
 	std::cout << "metadata reserved       : " << test.signalMetadata.reserved << std::endl;
 	for (int i=0;i<numsamples;i++)
 		std::cout << "indata[" << i << "]: " << indata[i] << std::endl;
-
+*/
 	std::cout << "Success! - exiting." << std::endl;
 	
+	std::cout << "----------------------------------------------------------------------------------" << std::endl;
+
 	if (data)
 	{
 //		free(data);
 		data = NULL;
 	}	
 
+	delete rstudy;
 	return(0);
 }
