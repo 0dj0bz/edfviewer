@@ -345,9 +345,9 @@ public:
                 {
                     if( (((sampleStart + curRec) * freq + i) >= artStartPos) &&
                             (((sampleStart + curRec)* freq +1) <= artStopPos) )
-                        artFlag[(int)(((sampleStart+curRec)*freq + i))] = true;
+                        artFlag[(int)((curRec*freq + i))] = true;
                     else
-                        artFlag[(int)(((sampleStart+curRec)*freq + i))] = false;
+                        artFlag[(int)((curRec*freq + i))] = false;
                 }
                 curRec++;
             }
