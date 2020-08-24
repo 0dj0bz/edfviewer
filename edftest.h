@@ -11,605 +11,611 @@
 
 using namespace std;
 
-struct EDF_HEADER
-{
-	char version[8];
-	char patientId[80];
-	char localId[80];
-	char startDate[8];
-	char startTime[8];
-	char headerBytes[8];
-	char reserved[44];
-	char numDataRecs[8];
-	char recDuration[8];
-	char numSignals[4];
+struct EDF_HEADER {
+    char version[8];
+    char patientId[80];
+    char localId[80];
+    char startDate[8];
+    char startTime[8];
+    char headerBytes[8];
+    char reserved[44];
+    char numDataRecs[8];
+    char recDuration[8];
+    char numSignals[4];
 } hdr;
 
 
-
-struct LABEL
-{
-	char value[16];
+struct LABEL {
+    char value[16];
 };
 
-struct TRANSDUCER_TYPE
-{
-	char value[80];
+struct TRANSDUCER_TYPE {
+    char value[80];
 };
 
-struct PHYS_DIMENSION
-{
-	char value[8];
+struct PHYS_DIMENSION {
+    char value[8];
 };
 
-struct VALUE
-{
-	char value[8];
+struct VALUE {
+    char value[8];
 };
 
-struct PREFILTER
-{
-	char value[80];
+struct PREFILTER {
+    char value[80];
 };
 
-struct SAMPLE_COUNT
-{
-	char value[8];
+struct SAMPLE_COUNT {
+    char value[8];
 };
 
-struct RESERVED
-{
-	char value[32];
+struct RESERVED {
+    char value[32];
 };
 
-class EDFHeader
-{
+class EDFHeader {
 public:
-	string version;
-	string patientId;
-	string localId;
-	string startDate;
-	string startTime;
-	string headerBytes;
-	string reserved;
-	string numDataRecs;
-	string recDuration;
-	string numSignals;
+    string version;
+    string patientId;
+    string localId;
+    string startDate;
+    string startTime;
+    string headerBytes;
+    string reserved;
+    string numDataRecs;
+    string recDuration;
+    string numSignals;
 };
 
-struct EDF_SIGNAL
-{
-	char label[16+1];
-	char transducerType[80+1];
-	char physDimension[8+1];
-	char physMinimum[8+1];
-	char physMaximum[8+1];
-	char digiMinimum[8+1];
-	char digiMaximum[8+1];
-	char prefilter[80+1];
-	char numSamples[8+1];
-	char reserved[32+1];
+struct EDF_SIGNAL {
+    char label[16 + 1];
+    char transducerType[80 + 1];
+    char physDimension[8 + 1];
+    char physMinimum[8 + 1];
+    char physMaximum[8 + 1];
+    char digiMinimum[8 + 1];
+    char digiMaximum[8 + 1];
+    char prefilter[80 + 1];
+    char numSamples[8 + 1];
+    char reserved[32 + 1];
 };
 
-class EDFSignal
-{
+struct EEGArtifactV2 {
+    char version[20] = "EEGArtifactV2";
+    int channel;
+    int numsamples;
+    char label[255];
+    EDF_SIGNAL signalMetadata;
+};
+
+struct EEGArtifactV3 {
+    char version[20] = "EEGArtifactV3";
+    int channel;
+    int numSamples;
+    char label[255];
+    float sampleStart;
+    float sampleEnd;
+    float artStart;
+    float artEnd;
+    EDF_SIGNAL signalMetadata;
+} artheader;
+
+class EDFSignal {
 public:
-	string label;
-	string transducerType;
-	string physDimension;
-	string physMinimum;
-	string physMaximum;
-	string digiMinimum;
-	string digiMaximum;
-	string prefilter;
-	string numSamples;
-	string reserved;
+    string label;
+    string transducerType;
+    string physDimension;
+    string physMinimum;
+    string physMaximum;
+    string digiMinimum;
+    string digiMaximum;
+    string prefilter;
+    string numSamples;
+    string reserved;
 
 
-	EDFSignal operator=(EDFSignal rhs)
-	{
-		label = rhs.label.c_str();
-		transducerType = rhs.transducerType.c_str();
-		physDimension = rhs.physDimension.c_str();
-		physMinimum = rhs.physMinimum.c_str();
-		physMaximum = rhs.physMaximum.c_str();
-		digiMinimum = rhs.digiMinimum.c_str();
-		digiMaximum = rhs.digiMaximum.c_str();
-		prefilter = rhs.prefilter.c_str();
-		numSamples = rhs.numSamples.c_str();
-		reserved = rhs.reserved.c_str();
+    EDFSignal operator=(EDFSignal rhs) {
+        label = rhs.label.c_str();
+        transducerType = rhs.transducerType.c_str();
+        physDimension = rhs.physDimension.c_str();
+        physMinimum = rhs.physMinimum.c_str();
+        physMaximum = rhs.physMaximum.c_str();
+        digiMinimum = rhs.digiMinimum.c_str();
+        digiMaximum = rhs.digiMaximum.c_str();
+        prefilter = rhs.prefilter.c_str();
+        numSamples = rhs.numSamples.c_str();
+        reserved = rhs.reserved.c_str();
 
-	};
+    };
 
-	~EDFSignal() 
-	{
-			
-	};
-		
-};
+    ~EDFSignal() {
 
-
-void assign(EDF_SIGNAL *lhs, EDFSignal rhs)
-{
-	strcpy(&lhs->label[0], rhs.label.c_str());
-	lhs->label[sizeof(lhs->label)-1] = '\0';
-
-	strcpy(&lhs->transducerType[0], rhs.transducerType.c_str());
-	lhs->transducerType[sizeof(lhs->transducerType)-1] = '\0';	
-
-	strcpy(&lhs->physDimension[0], rhs.physDimension.c_str());
-	lhs->physDimension[sizeof(lhs->physDimension)-1] = '\0';
-	
-	strcpy(&lhs->physMinimum[0], rhs.physMinimum.c_str());
-	lhs->physMinimum[sizeof(lhs->physMinimum)-1] = '\0';
-
-	strcpy(&lhs->physMaximum[0], rhs.physMaximum.c_str());
-	lhs->physMaximum[sizeof(lhs->physMaximum)-1] = '\0';
-
-	strcpy(&lhs->digiMinimum[0], rhs.digiMinimum.c_str());
-	lhs->digiMinimum[sizeof(lhs->digiMinimum)-1] = '\0';
-
-	strcpy(&lhs->digiMaximum[0], rhs.digiMaximum.c_str());
-	lhs->digiMaximum[sizeof(lhs->digiMaximum)-1] = '\0';
-
-	strcpy(&lhs->prefilter[0], rhs.prefilter.c_str());
-	lhs->prefilter[sizeof(lhs->prefilter)-1] = '\0';
-
-	strcpy(&lhs->numSamples[0], rhs.numSamples.c_str());
-	lhs->numSamples[sizeof(lhs->numSamples)-1] = '\0';
-
-	strcpy(&lhs->reserved[0], rhs.reserved.c_str());
-	lhs->reserved[sizeof(lhs->reserved)-1] = '\0';
+    };
 
 };
 
 
+void assign(EDF_SIGNAL *lhs, EDFSignal rhs) {
+    strcpy(&lhs->label[0], rhs.label.c_str());
+    lhs->label[sizeof(lhs->label) - 1] = '\0';
 
-class EDFData
-{
+    strcpy(&lhs->transducerType[0], rhs.transducerType.c_str());
+    lhs->transducerType[sizeof(lhs->transducerType) - 1] = '\0';
+
+    strcpy(&lhs->physDimension[0], rhs.physDimension.c_str());
+    lhs->physDimension[sizeof(lhs->physDimension) - 1] = '\0';
+
+    strcpy(&lhs->physMinimum[0], rhs.physMinimum.c_str());
+    lhs->physMinimum[sizeof(lhs->physMinimum) - 1] = '\0';
+
+    strcpy(&lhs->physMaximum[0], rhs.physMaximum.c_str());
+    lhs->physMaximum[sizeof(lhs->physMaximum) - 1] = '\0';
+
+    strcpy(&lhs->digiMinimum[0], rhs.digiMinimum.c_str());
+    lhs->digiMinimum[sizeof(lhs->digiMinimum) - 1] = '\0';
+
+    strcpy(&lhs->digiMaximum[0], rhs.digiMaximum.c_str());
+    lhs->digiMaximum[sizeof(lhs->digiMaximum) - 1] = '\0';
+
+    strcpy(&lhs->prefilter[0], rhs.prefilter.c_str());
+    lhs->prefilter[sizeof(lhs->prefilter) - 1] = '\0';
+
+    strcpy(&lhs->numSamples[0], rhs.numSamples.c_str());
+    lhs->numSamples[sizeof(lhs->numSamples) - 1] = '\0';
+
+    strcpy(&lhs->reserved[0], rhs.reserved.c_str());
+    lhs->reserved[sizeof(lhs->reserved) - 1] = '\0';
+
+};
+
+
+class EDFData {
 public:
-	short ***data;
-	long maxSamples;
+    short ***data;
+    long maxSamples;
 
-	EDFData(int signals, int numRecs, int sampleFreq)
-	{
-		maxSamples = numRecs;
+    EDFData(int signals, int numRecs, int sampleFreq) {
+        maxSamples = numRecs;
 
-		data = (short ***) malloc((numRecs+1)*sizeof(short *));
-		if (data)
-		{
-			for (int i=0;i<=signals;i++)
-			{
-				data[i] = (short **) malloc((numRecs+1)*sizeof(short *));
-				if (data[i])
-				{
-					for (int j=0;j<=sampleFreq;j++)
-					{
-						data[i][j] = (short *) malloc((sampleFreq+1)*sizeof(short *));
+        data = (short ***) malloc((numRecs + 1) * sizeof(short *));
+        if (data) {
+            for (int i = 0; i <= signals; i++) {
+                data[i] = (short **) malloc((numRecs + 1) * sizeof(short *));
+                if (data[i]) {
+                    for (int j = 0; j <= sampleFreq; j++) {
+                        data[i][j] = (short *) malloc((sampleFreq + 1) * sizeof(short *));
 
-						if (!data[i][j])
-						{
-							std::cout << "EDFData(int, int, int): error alocating space. (3)" << std::endl;
-						}
-					}
-				}
-				else
-				{
-					std::cout << "EDFData(int,int,int): error allocating space. (2)" << std::endl;
+                        if (!data[i][j]) {
+                            std::cout << "EDFData(int, int, int): error alocating space. (3)" << std::endl;
+                        }
+                    }
+                } else {
+                    std::cout << "EDFData(int,int,int): error allocating space. (2)" << std::endl;
 
-				}
-				
-			}
-		}
-		else
-			std::cout << "EDFData(int,int,int): error allocating space (1)" << std::endl;
+                }
 
-	};
+            }
+        } else
+            std::cout << "EDFData(int,int,int): error allocating space (1)" << std::endl;
+
+    };
 
 };
 
-class EEGStudy
-{
+class EEGStudy {
 public:
-	EDFHeader *header;
-	std::map<int, EDFSignal> signals;
-	short ***signalData;
+    EDFHeader *header;
+    std::map<int, EDFSignal> signals;
+    short ***signalData;
 
 
-	EEGStudy()
-	{
-		this->header = NULL;
-		this->signalData = NULL;
-	};
+    EEGStudy() {
+        this->header = NULL;
+        this->signalData = NULL;
+    };
 
-	EEGStudy(EDFHeader *hdr, std::map<int, EDFSignal> sigList, short ***sigData)
-	{
-		this->header = hdr;
-		this->signals = sigList;
-		this->signalData = sigData;
-	};
+    EEGStudy(EDFHeader *hdr, std::map<int, EDFSignal> sigList, short ***sigData) {
+        this->header = hdr;
+        this->signals = sigList;
+        this->signalData = sigData;
+    };
 
 
-	~EEGStudy()
-	{
+    ~EEGStudy() {
 
-	
-		for (int i=0;i<stoi(this->header->numDataRecs);i++)
-		{
 
-			if (this->signalData[i]) // malloc successful
-			{	
+        for (int i = 0; i < stoi(this->header->numDataRecs); i++) {
 
-				for (int j=0;j<stoi(this->header->numSignals);j++)
-				{
-					free(this->signalData[i][j]);
-				}
+            if (this->signalData[i]) // malloc successful
+            {
 
-			}
+                for (int j = 0; j < stoi(this->header->numSignals); j++) {
+                    free(this->signalData[i][j]);
+                }
 
-			free(this->signalData[i]);
-		}
-		
-		free(this->signalData);
+            }
 
-		delete this->header;
+            free(this->signalData[i]);
+        }
 
-	};
+        free(this->signalData);
 
-	// EEGStudy::getSegment(short *dst, int sigNum, float startTime, float endTime)
-	// Assumptions:
-	// short *dst has been malloc'd large enough to hold 1+(endTime-startTime)*freq short ints
-	// endTime >= startTime
-	// sigNum < this->header->numSignals
+        delete this->header;
 
-	int getSegment(short * &dst, int sigNum, float startTime, float endTime)
-	{
+    };
 
-		int freq = stoi(this->signals[sigNum].numSamples) / stoi(this->header->recDuration);
+    // EEGStudy::getSegment(short *dst, int sigNum, float startTime, float endTime)
+    // Assumptions:
+    // endTime >= startTime
+    // sigNum < this->header->numSignals
+    // Notes:
+    //      For story EDF-1, all modifcations to startTime and endTime have been moved from
+    //      capture-artifact.cpp to this member function.
 
-		startTime = floor(startTime);
-		endTime = ceil(endTime);
+    int getSegment(short *&dst, bool *&artFlag, EEGArtifactV3 &artHeader, int sigNum, float startTime,
+                   float endTime, float windowBuffer) {
 
-		int startPos = freq * startTime;
-		int endPos = freq * endTime;
+        int freq = stoi(this->signals[sigNum].numSamples) / stoi(this->header->recDuration);
 
-		std::cout << "EEGStudy::getSegment - startTime: " << startTime << std::endl;
-		std::cout << "EEGStudy::getSegment - endTime  : " << endTime << std::endl;
-				
-		std::cout << "EEGStudy::getSegment - startPos : " << startPos  << std::endl;
-		std::cout << "EEGStudy::getSegment - endPos   : " << endPos  << std::endl;
+        float sampleStart, sampleEnd;
 
-		// std::cout << "About to create dst array...";
+        sampleStart = startTime;
+        sampleEnd = endTime;
 
-				
-		long numSamples = endPos-startPos;
-		dst = (short *) malloc(numSamples*sizeof(short));
+        if (sampleStart - windowBuffer > 0.0f)
+            sampleStart -= windowBuffer;
+        else
+            sampleStart = 0.0f;
 
-		long samplesToCopy = numSamples;
-		
-		if (dst)
-		{
-			long curRec = 0;
-			
-			int startRecord = floor(startTime)/stol(this->header->recDuration);
+        if (sampleEnd + windowBuffer < stof(this->header->recDuration) * stof(this->header->numDataRecs))
+            sampleEnd += windowBuffer;
 
-			while (samplesToCopy>0)
-			{
-				// to do this correctly, we MAY need to execute multiple memcpy statements:
-				//
-				// there may be one or more records in this->signalData->data that contain this data
-				//
-				// each record may be indexed by:
-				//	floor(startTime/this->header->recDuration)
-				//
-				// since we may start part-way into a record, the address of the loction is found
-				// by 
-				//	mod(startTime/this->header->recDuration)
-				//
-				// and the number of short ints to copy is found by
-				//	this->signals[sigNum].numSamples - mod(startTime/this->header->recDuration) + 1
-				//
-				// this process continues until samplesRemaining == 0.
 
-				// for this time, we will start the range with the floor() of the startTime and
-				// the ceil() of the endTime to make the processing easier. we may come back later and
-				// implement partial record ranges. - rla 2020/08/18
+        sampleStart = floor(sampleStart);
+        sampleEnd   = ceil(sampleEnd);
 
-				//std::cout << "EEGStudy::getSegment - about to copy data to dst array..." << std::endl;
+        int startPos = freq * sampleStart;
+        int endPos   = freq * sampleEnd;
 
-				int startRecord = floor(startTime)/stol(this->header->recDuration);
+        int artStartPos = freq * startTime;
+        int artStopPos = freq * endTime;
 
-				memcpy(dst+(curRec*freq), this->signalData[startRecord+curRec][sigNum],
-					stol(this->signals[sigNum].numSamples)*sizeof(short));
-					//(endPos-startPos+1)*sizeof(short));
+        std::cout << "EEGStudy::getSegment - sampleStart  : " << sampleStart << std::endl;
+        std::cout << "EEGStudy::getSegment - sampleEnd    : " << sampleEnd << std::endl;
 
-				samplesToCopy -= stol(this->signals[sigNum].numSamples);
+        std::cout << "EEGStudy::getSegment - artifactStart: " << startTime << std::endl;
+        std::cout << "EEGStudy::getSegment - artifactEnd  : " << endTime << std::endl;
 
-				curRec++;
+        std::cout << "EEGStudy::getSegment - startPos     : " << startPos << std::endl;
+        std::cout << "EEGStudy::getSegment - endPos       : " << endPos << std::endl;
 
-				//std::cout << "EEGStudy::getSegment - SUCCESS! Copied " << (endPos-startPos) << " values." 
-					//<< std::endl;
+        // std::cout << "About to create dst array...";
 
-			 	//std::cout << "EEGStudy::getSegment - samples remaining: " << samplesToCopy << std::endl; 
-			}
-		}	
-		else
-		{
-		 	std::cout << "EEGStudy::getSegment - malloc failed." << std::endl;
-		 	return(-1);
-		}
+        artHeader.sampleStart = sampleStart;
+        artHeader.sampleEnd = sampleEnd;
+        artHeader.artStart = startTime;
+        artHeader.artEnd = endTime;
+        artHeader.numSamples = endPos - startPos;
+        artHeader.channel = signNum;
 
-		return((endPos-startPos));
+        long numSamples = endPos - startPos;
+        dst = (short *) malloc(numSamples * sizeof(short));
+        artFlag = (bool *) malloc(numSamples * sizeof(bool));
 
-	}
+        long samplesToCopy = numSamples;
 
-	void loadEDFfile(string fn, bool verbose=false)
-	{
-	
-		enum FileType {EDF, EDFPLUS};
+        if (dst) {
+            long curRec = 0;
+
+            int startRecord = floor(sampleStart) / stol(this->header->recDuration);
+
+            while (samplesToCopy > 0) {
+                // to do this correctly, we MAY need to execute multiple memcpy statements:
+                //
+                // there may be one or more records in this->signalData->data that contain this data
+                //
+                // each record may be indexed by:
+                //	floor(sampleStart/this->header->recDuration)
+                //
+                // since we may start part-way into a record, the address of the loction is found
+                // by
+                //	mod(sampleStart/this->header->recDuration)
+                //
+                // and the number of short ints to copy is found by
+                //	this->signals[sigNum].numSamples - mod(sampleStart/this->header->recDuration) + 1
+                //
+                // this process continues until samplesRemaining == 0.
+
+                // for this time, we will start the range with the floor() of the startTime and
+                // the ceil() of the endTime to make the processing easier. we may come back later and
+                // implement partial record ranges. - rla 2020/08/18
+
+                //std::cout << "EEGStudy::getSegment - about to copy data to dst array..." << std::endl;
+
+                int startRecord = floor(sampleStart) / stol(this->header->recDuration);
+
+                memcpy(dst + (curRec * freq), this->signalData[startRecord + curRec][sigNum],
+                       stol(this->signals[sigNum].numSamples) * sizeof(short));
+
+                samplesToCopy -= stol(this->signals[sigNum].numSamples);
+
+                // now, we need to go through each sample in this record to determine if the artifact is present
+
+                for (long i=0;i<(stol(this->signals[sigNum].numSamples));i++)
+                {
+                    if( (((sampleStart + curRec) * freq + i) >= artStartPos) &&
+                            (((sampleStart + curRec)* freq +1) <= artStopPos) )
+                        artFlag[(((sampleStart+curRec)*freq + i))] = true;
+                    else
+                        artFlag[(((sampleStart+curRec)*freq + i))] = false;
+                }
+                curRec++;
+            }
+        } else {
+            std::cout << "EEGStudy::getSegment - malloc failed." << std::endl;
+            return (-1);
+        }
+
+        return ((endPos - startPos));
+
+    }
+
+    void loadEDFfile(string fn, bool verbose = false) {
+
+        enum FileType {
+            EDF, EDFPLUS
+        };
 //		EDFHeader * header;
 //		std::map<int, EDFSignal> signalList;
 //		EDFData * edfData;
 
 
-		FILE* f = fopen(fn.c_str(), "r");
+        FILE *f = fopen(fn.c_str(), "r");
 
-		if (f == NULL)
-		{
+        if (f == NULL) {
 
-			std::cout << "Error opening file - ABORTING." << std::endl;
-			return;
-		}
-		else
-			std::cout << "File opened successfully." << std::endl;
+            std::cout << "Error opening file - ABORTING." << std::endl;
+            return;
+        } else
+            std::cout << "File opened successfully." << std::endl;
 
-		// Process the fixed part of the header (first 256 bytes)
- 
-		fread(&hdr, sizeof(hdr), 1, f);
+        // Process the fixed part of the header (first 256 bytes)
 
-		this->header = new EDFHeader();
+        fread(&hdr, sizeof(hdr), 1, f);
 
-		this->header->patientId   = string(hdr.patientId,   sizeof(hdr.patientId));
-		this->header->startDate   = string(hdr.startDate,   sizeof(hdr.startDate));
-		this->header->startTime   = string(hdr.startTime,   sizeof(hdr.startTime));
-		this->header->reserved    = string(hdr.reserved,    sizeof(hdr.reserved));
-		this->header->numDataRecs = string(hdr.numDataRecs, sizeof(hdr.numDataRecs));
-		this->header->recDuration = string(hdr.recDuration, sizeof(hdr.recDuration));
-		this->header->numSignals  = string(hdr.numSignals,  sizeof(hdr.numSignals));
+        this->header = new EDFHeader();
 
-		if (verbose)
-		{
-			cout << "FileType : " << ((this->header->reserved.substr(0, 4)=="EDF+")?"EDF+":"EDF") << endl;
+        this->header->patientId = string(hdr.patientId, sizeof(hdr.patientId));
+        this->header->startDate = string(hdr.startDate, sizeof(hdr.startDate));
+        this->header->startTime = string(hdr.startTime, sizeof(hdr.startTime));
+        this->header->reserved = string(hdr.reserved, sizeof(hdr.reserved));
+        this->header->numDataRecs = string(hdr.numDataRecs, sizeof(hdr.numDataRecs));
+        this->header->recDuration = string(hdr.recDuration, sizeof(hdr.recDuration));
+        this->header->numSignals = string(hdr.numSignals, sizeof(hdr.numSignals));
 
-			cout << "EDF File : " << fn << endl;
-			cout << "-----------------------------------------------------------------------------------------------------" << endl;
-			cout << "PatientId           : " << this->header->patientId   << endl;
-			cout << "Start Date          : " << this->header->startDate   << endl;
-			cout << "Start Time          : " << this->header->startTime   << endl;
-			cout << "Reserved            : " << this->header->reserved    << endl;
-			cout << "# Data Recs         : " << this->header->numDataRecs << endl;
-			cout << "Record Duration (s) : " << this->header->recDuration << endl;
-			cout << "Number of Signals   : " << this->header->numSignals  << endl;
-		}
+        if (verbose) {
+            cout << "FileType : " << ((this->header->reserved.substr(0, 4) == "EDF+") ? "EDF+" : "EDF") << endl;
 
-		tm tm_sessionTime;
+            cout << "EDF File : " << fn << endl;
+            cout
+                    << "-----------------------------------------------------------------------------------------------------"
+                    << endl;
+            cout << "PatientId           : " << this->header->patientId << endl;
+            cout << "Start Date          : " << this->header->startDate << endl;
+            cout << "Start Time          : " << this->header->startTime << endl;
+            cout << "Reserved            : " << this->header->reserved << endl;
+            cout << "# Data Recs         : " << this->header->numDataRecs << endl;
+            cout << "Record Duration (s) : " << this->header->recDuration << endl;
+            cout << "Number of Signals   : " << this->header->numSignals << endl;
+        }
 
-		tm_sessionTime.tm_mday = stoi(this->header->startDate.substr(0, 2));
-		tm_sessionTime.tm_mon  = stoi(this->header->startDate.substr(3, 2))-1;
-		tm_sessionTime.tm_year = stoi(this->header->startDate.substr(6, 2))+100;
+        tm tm_sessionTime;
 
-		tm_sessionTime.tm_hour = stoi(this->header->startTime.substr(0, 2));
-		tm_sessionTime.tm_min  = stoi(this->header->startTime.substr(3, 2));
-		tm_sessionTime.tm_sec  = stoi(this->header->startTime.substr(6, 2));
-		tm_sessionTime.tm_isdst= -1; // this is -1 since TZ & DST not available in EDF files
+        tm_sessionTime.tm_mday = stoi(this->header->startDate.substr(0, 2));
+        tm_sessionTime.tm_mon = stoi(this->header->startDate.substr(3, 2)) - 1;
+        tm_sessionTime.tm_year = stoi(this->header->startDate.substr(6, 2)) + 100;
 
-		time_t t_sessionTime = mktime(&tm_sessionTime); 
+        tm_sessionTime.tm_hour = stoi(this->header->startTime.substr(0, 2));
+        tm_sessionTime.tm_min = stoi(this->header->startTime.substr(3, 2));
+        tm_sessionTime.tm_sec = stoi(this->header->startTime.substr(6, 2));
+        tm_sessionTime.tm_isdst = -1; // this is -1 since TZ & DST not available in EDF files
 
-		double recordDuration = stod(this->header->recDuration);
+        time_t t_sessionTime = mktime(&tm_sessionTime);
 
-		// now we have enough information to process the variable part of the header
+        double recordDuration = stod(this->header->recDuration);
 
-		long numSignals = stol(this->header->numSignals);
+        // now we have enough information to process the variable part of the header
 
+        long numSignals = stol(this->header->numSignals);
 
-		// first, the labels
 
-		LABEL labels[numSignals];
-		fread(&labels, sizeof(LABEL), numSignals, f);
+        // first, the labels
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].label = string(labels[i].value, sizeof(LABEL));
-		}
+        LABEL labels[numSignals];
+        fread(&labels, sizeof(LABEL), numSignals, f);
 
-		// next, transducer types
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].label = string(labels[i].value, sizeof(LABEL));
+        }
 
-		TRANSDUCER_TYPE ttypes[numSignals];
-		fread(&ttypes, sizeof(TRANSDUCER_TYPE), numSignals, f);
+        // next, transducer types
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].transducerType = string(ttypes[i].value, sizeof(TRANSDUCER_TYPE));
-		}
+        TRANSDUCER_TYPE ttypes[numSignals];
+        fread(&ttypes, sizeof(TRANSDUCER_TYPE), numSignals, f);
 
-		// next, physical dimension of each signal
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].transducerType = string(ttypes[i].value, sizeof(TRANSDUCER_TYPE));
+        }
 
-		PHYS_DIMENSION physDimension[numSignals];
-		fread(&physDimension, sizeof(PHYS_DIMENSION), numSignals, f);
+        // next, physical dimension of each signal
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].physDimension = string(physDimension[i].value, sizeof(PHYS_DIMENSION));
-		}
+        PHYS_DIMENSION physDimension[numSignals];
+        fread(&physDimension, sizeof(PHYS_DIMENSION), numSignals, f);
 
-		// next, physical minimum
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].physDimension = string(physDimension[i].value, sizeof(PHYS_DIMENSION));
+        }
 
-		VALUE physMinimum[numSignals];
-		fread(&physMinimum, sizeof(VALUE), numSignals, f);
+        // next, physical minimum
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].physMinimum = string(physMinimum[i].value, sizeof(VALUE));
-		}
+        VALUE physMinimum[numSignals];
+        fread(&physMinimum, sizeof(VALUE), numSignals, f);
 
-		// next, physical maximum
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].physMinimum = string(physMinimum[i].value, sizeof(VALUE));
+        }
 
-		VALUE physMaximum[numSignals];
-		fread(&physMaximum, sizeof(VALUE), numSignals, f);
+        // next, physical maximum
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].physMaximum = string(physMaximum[i].value, sizeof(VALUE));
-		}
+        VALUE physMaximum[numSignals];
+        fread(&physMaximum, sizeof(VALUE), numSignals, f);
 
-		// next, digital minimum
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].physMaximum = string(physMaximum[i].value, sizeof(VALUE));
+        }
 
-		VALUE digiMinimum[numSignals];
-		fread(&digiMinimum, sizeof(VALUE), numSignals, f);
+        // next, digital minimum
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].digiMinimum = string(digiMinimum[i].value, sizeof(VALUE));
-		}
+        VALUE digiMinimum[numSignals];
+        fread(&digiMinimum, sizeof(VALUE), numSignals, f);
 
-		// next, digital maximum
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].digiMinimum = string(digiMinimum[i].value, sizeof(VALUE));
+        }
 
-		VALUE digiMaximum[numSignals];
-		fread(&digiMaximum, sizeof(VALUE), numSignals, f);
+        // next, digital maximum
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].digiMaximum = string(digiMaximum[i].value, sizeof(VALUE));
-		}
+        VALUE digiMaximum[numSignals];
+        fread(&digiMaximum, sizeof(VALUE), numSignals, f);
 
-		// next, prefiltering
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].digiMaximum = string(digiMaximum[i].value, sizeof(VALUE));
+        }
 
-		PREFILTER prefilter[numSignals];
-		fread(&prefilter, sizeof(PREFILTER), numSignals, f);
+        // next, prefiltering
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].prefilter = string(prefilter[i].value, sizeof(VALUE));
-		}
+        PREFILTER prefilter[numSignals];
+        fread(&prefilter, sizeof(PREFILTER), numSignals, f);
 
-		// next, samples / record
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].prefilter = string(prefilter[i].value, sizeof(VALUE));
+        }
 
-		SAMPLE_COUNT numSamples[numSignals];
-		fread(&numSamples, sizeof(SAMPLE_COUNT), numSignals, f);
+        // next, samples / record
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].numSamples = string(numSamples[i].value, sizeof(SAMPLE_COUNT));
-		}
+        SAMPLE_COUNT numSamples[numSignals];
+        fread(&numSamples, sizeof(SAMPLE_COUNT), numSignals, f);
 
-		// next, reserved
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].numSamples = string(numSamples[i].value, sizeof(SAMPLE_COUNT));
+        }
 
-		RESERVED reserved[numSignals];
-		fread(&reserved, sizeof(RESERVED), numSignals, f);
+        // next, reserved
 
-		for (int i=0; i<numSignals; i++)
-		{
-			signals[i].reserved = string(reserved[i].value, sizeof(RESERVED));
-		}
+        RESERVED reserved[numSignals];
+        fread(&reserved, sizeof(RESERVED), numSignals, f);
 
-		if (verbose)
-		{
-			cout << "-------------------------------------------------------------------------------------------------" << endl;
+        for (int i = 0; i < numSignals; i++) {
+            signals[i].reserved = string(reserved[i].value, sizeof(RESERVED));
+        }
 
-			for (int i=0; i<numSignals; i++)
-			{
+        if (verbose) {
+            cout << "-------------------------------------------------------------------------------------------------"
+                 << endl;
 
-				cout << "Sample        : " << i << endl;
-				cout << "Label         : " << signals[i].label << endl;
-				cout << "Trans. Type   :" << signals[i].transducerType << endl;
-				cout << "Phys. Dim.    : " << signals[i].physDimension << " Min : " << signals[i].physMinimum << " Max : " << 
-				signals[i].physMaximum << endl;
-				cout << "Digital Min   : " << signals[i].digiMinimum << " Max : " << signals[i].digiMaximum << endl;
-				cout << "Prefilter     : " << signals[i].prefilter << endl;
-				cout << "Samples / rec : " << signals[i].numSamples << endl;
-				cout << "Reserved      : " << signals[i].reserved << endl;
+            for (int i = 0; i < numSignals; i++) {
 
-				cout << "-------------------------------------------------------------------------------------------------" << endl;
+                cout << "Sample        : " << i << endl;
+                cout << "Label         : " << signals[i].label << endl;
+                cout << "Trans. Type   :" << signals[i].transducerType << endl;
+                cout << "Phys. Dim.    : " << signals[i].physDimension << " Min : " << signals[i].physMinimum
+                     << " Max : " <<
+                     signals[i].physMaximum << endl;
+                cout << "Digital Min   : " << signals[i].digiMinimum << " Max : " << signals[i].digiMaximum << endl;
+                cout << "Prefilter     : " << signals[i].prefilter << endl;
+                cout << "Samples / rec : " << signals[i].numSamples << endl;
+                cout << "Reserved      : " << signals[i].reserved << endl;
 
-			}
-		}
+                cout
+                        << "-------------------------------------------------------------------------------------------------"
+                        << endl;
 
-		// now, read the data
-		// the file will have header.numDataRecs "rows" of data, each with header.numSignals sets of data elements
-		// for each signal s in the data rec, there will be signalList[s].numSamples of 2-byte (short int) values
-		// 
-		// the timestamp for each data rec will be header.startTime [hh:mm:ss] + (recNum*header.recDuration) seconds
-		// so, data should be allocated using numDataRecs * max(numSamples)
-	
-		t_sessionTime = mktime(&tm_sessionTime); 
+            }
+        }
 
-		//this->signalData = new EDFData();
+        // now, read the data
+        // the file will have header.numDataRecs "rows" of data, each with header.numSignals sets of data elements
+        // for each signal s in the data rec, there will be signalList[s].numSamples of 2-byte (short int) values
+        //
+        // the timestamp for each data rec will be header.startTime [hh:mm:ss] + (recNum*header.recDuration) seconds
+        // so, data should be allocated using numDataRecs * max(numSamples)
 
-		short *** data;
+        t_sessionTime = mktime(&tm_sessionTime);
 
-		this->signalData = (short ***) malloc(stol(this->header->numDataRecs)*sizeof(short **));
+        //this->signalData = new EDFData();
 
-		for (int i=0;i<stoi(this->header->numDataRecs);i++)
-		{
-			// for each rec, allocate an array of pointers to store each block of signal data
+        short ***data;
 
-    			this->signalData[i] = (short **) malloc(stol(this->header->numSignals)*sizeof(short *));
+        this->signalData = (short ***) malloc(stol(this->header->numDataRecs) * sizeof(short **));
 
-			if (this->signalData[i]) // malloc successful
-			{	
-				if (verbose)
-    				{
-			    		cout << "-------------------------------------------------------------------------------------------------" << endl;
+        for (int i = 0; i < stoi(this->header->numDataRecs); i++) {
+            // for each rec, allocate an array of pointers to store each block of signal data
 
-			    		// compute the timestamp for this data record
-					cout << asctime(localtime(&t_sessionTime)) << endl;
-				}
+            this->signalData[i] = (short **) malloc(stol(this->header->numSignals) * sizeof(short *));
 
+            if (this->signalData[i]) // malloc successful
+            {
+                if (verbose) {
+                    cout
+                            << "-------------------------------------------------------------------------------------------------"
+                            << endl;
 
-				struct tm *ptm_sessionTime = localtime(&t_sessionTime);
-				ptm_sessionTime->tm_sec += stod(this->header->recDuration);
-		    		t_sessionTime = mktime(ptm_sessionTime);
+                    // compute the timestamp for this data record
+                    cout << asctime(localtime(&t_sessionTime)) << endl;
+                }
 
-				// for each signal in the record, read the number of samples
 
-				for (int j=0;j<stoi(this->header->numSignals);j++)
-				{
-					// now for each channel, we need to allocate a block of data to read the data into (signalList[j].numSamples) 
-			
-					this->signalData[i][j] = (short *) malloc((stol(this->signals[j].numSamples)+1)*sizeof(short));
+                struct tm *ptm_sessionTime = localtime(&t_sessionTime);
+                ptm_sessionTime->tm_sec += stod(this->header->recDuration);
+                t_sessionTime = mktime(ptm_sessionTime);
 
+                // for each signal in the record, read the number of samples
 
-	    				fread(this->signalData[i][j], sizeof(short), stoi(this->signals[j].numSamples), f);
+                for (int j = 0; j < stoi(this->header->numSignals); j++) {
+                    // now for each channel, we need to allocate a block of data to read the data into (signalList[j].numSamples)
 
-				    	if (verbose)
-				    	{
-				    		if (j==0)
-						{
-						    	cout << "Signal[" << j << "] Data Record[" << i << "]\t - ";
-							for (int k=0;k<stoi(this->signals[j].numSamples);k++)
-						    	cout << this->signalData[i][j][k] << ", " << endl;
-						}
+                    this->signalData[i][j] = (short *) malloc((stol(this->signals[j].numSamples) + 1) * sizeof(short));
 
-				    	}
 
-				}
+                    fread(this->signalData[i][j], sizeof(short), stoi(this->signals[j].numSamples), f);
 
-				if (verbose)
-					cout << endl;
-			}
-		}
+                    if (verbose) {
+                        if (j == 0) {
+                            cout << "Signal[" << j << "] Data Record[" << i << "]\t - ";
+                            for (int k = 0; k < stoi(this->signals[j].numSamples); k++)
+                                cout << this->signalData[i][j][k] << ", " << endl;
+                        }
+
+                    }
+
+                }
+
+                if (verbose)
+                    cout << endl;
+            }
+        }
 
 
 //		study = new EEGStudy(header, signalList, edfData);
 
-		if (verbose)
-		{
-			for (int j=0;j<stoi(this->header->numSignals);j++)
-			    for (int i=0;i<stoi(this->header->numDataRecs);i++)
-				for (int k=0;k<stoi(this->signals[j].numSamples);k++)
-				    	cout << "Signal[" << j << "] Data Record[" << i << "]elem[" << k << "]\t - " << this->signalData[j][i][k] << endl;
-		}
+        if (verbose) {
+            for (int j = 0; j < stoi(this->header->numSignals); j++)
+                for (int i = 0; i < stoi(this->header->numDataRecs); i++)
+                    for (int k = 0; k < stoi(this->signals[j].numSamples); k++)
+                        cout << "Signal[" << j << "] Data Record[" << i << "]elem[" << k << "]\t - "
+                             << this->signalData[j][i][k] << endl;
+        }
 
 //		return study;
-	}
+    }
 };
