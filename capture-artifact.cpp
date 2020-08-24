@@ -76,6 +76,8 @@ int main(int argc, char **argv) {
     fwrite(&artheader, sizeof(EEGArtifactV3), 1, fp);
     //now write the data, an array of shorts
     fwrite(data, sizeof(short), numsamples, fp);
+    //now write the artifact flags
+    fwrite(artFlags, sizeof(bool), numsamples, fp);
 
     fflush(fp);
     fclose(fp);
