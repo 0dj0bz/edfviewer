@@ -296,7 +296,7 @@ public:
         artHeader.artStart = startTime;
         artHeader.artEnd = endTime;
         artHeader.numSamples = endPos - startPos;
-        artHeader.channel = signNum;
+        artHeader.channel = sigNum;
 
         long numSamples = endPos - startPos;
         dst = (short *) malloc(numSamples * sizeof(short));
@@ -345,9 +345,9 @@ public:
                 {
                     if( (((sampleStart + curRec) * freq + i) >= artStartPos) &&
                             (((sampleStart + curRec)* freq +1) <= artStopPos) )
-                        artFlag[(((sampleStart+curRec)*freq + i))] = true;
+                        artFlag[(int)(((sampleStart+curRec)*freq + i))] = true;
                     else
-                        artFlag[(((sampleStart+curRec)*freq + i))] = false;
+                        artFlag[(int)(((sampleStart+curRec)*freq + i))] = false;
                 }
                 curRec++;
             }

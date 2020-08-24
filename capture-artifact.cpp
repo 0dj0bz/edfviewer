@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     std::cout << "Version    : " << test.version << std::endl;
     std::cout << "Channel    : " << test.channel << std::endl;
     std::cout << "Label      : " << test.label << std::endl;
-    std::cout << "Numsamples : " << test.numsamples << std::endl << std::endl;
+    std::cout << "Numsamples : " << test.numSamples << std::endl << std::endl;
 /*
 	std::cout << "metadata label          : " << test.signalMetadata.label << std::endl;
 	std::cout << "metadata transducerType : " << test.signalMetadata.transducerType << std::endl;
