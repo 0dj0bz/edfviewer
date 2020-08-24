@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
 
 
     free(data);
+    free(artFlags);
 
     //now let's read it back in to see if it worked
     EEGArtifactV3 test;
