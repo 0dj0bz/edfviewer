@@ -14,7 +14,7 @@ for tld1 in `ls $snippet_dst`; do
 			for tld4 in `(cd $snippet_dst/$tld1/$tld2/$tld3/ && ls -1 *.art)`
 			do 
 				fname=$snippet_dst/$tld1/$tld2/$tld3/$tld4
-        `build-catalog $fname >> $snippet_dst/snippet-catalog.tsv`
+        `./build-catalog $fname >> $snippet_dst/snippet-catalog.tsv`
 			done
 		done
 	done
