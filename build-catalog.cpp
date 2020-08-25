@@ -14,7 +14,7 @@
 // argv[0] - program name (e.g., "build-catalog")
 // argv[1] - fqdn of starting directory (e.g., "/mnt/f5c6f0d4-e553-4895-a955-e0f62ee703f4/tuh_eeg_art_snippets/")
 // output - a line entry to be concatenated to the artifact catalog
-// <electrode config>\t<fq .art filename>\t<label>
+// <label>\t<electrode config>\t<fq .art filename>
 
 int main(int argc, char **argv)
 {
@@ -34,11 +34,11 @@ int main(int argc, char **argv)
 
     EEGArtifactV3 snippet;
 
-    FILE *fp = fopen(dstfile.c_str(), "rb");
+    FILE *fp = fopen(startDir.c_str(), "rb");
     fread(&snippet, sizeof(EEGArtifactV3), 1, fp);
     fclose(fp);
 
-    std::cout << snippet.signalMetadata[snippet.channel].label << "\t" << argv[1] << "\t" <<
-        snippet.label << std::endl;
+    std::cout << snippet.label << "\t" << snippet.signalMetadata.label << "\t" << argv[1] << std::endl; 
 
+    return 0;
 }
