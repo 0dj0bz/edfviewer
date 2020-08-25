@@ -355,7 +355,7 @@ public:
             std::cout << "EEGStudy::getSegment - malloc failed." << std::endl;
             return (-1);
         }
-
+        std::cout << "EEGStudy::getSegment - " << endPos-startPos << " samples returned." << std::endl;
         return ((endPos - startPos));
 
     }
