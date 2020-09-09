@@ -42,7 +42,7 @@ const char * appString = "EDF Viewer v0.1";
 
 const unsigned int numVertices =  256;
 
-std::string rootdn1     = "/media/robabbott/f5c6f0d4-e553-4895-a955-e0f62ee703f4";
+std::string rootdn1     = "/mnt/f5c6f0d4-e553-4895-a955-e0f62ee703f4";
 std::string subdir_dst  = "/tuh_eeg_artifact/v1.0.0/edf/01_tcp_ar";
 std::string study_dir   = "/002/00000254/s005_2010_11_15";
 std::string filename    = "/00000254_s005_t000.edf";

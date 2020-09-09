@@ -98,6 +98,19 @@ struct EEGArtifactV3 {
     float artStart;
     float artEnd;
     EDF_SIGNAL signalMetadata;
+};
+
+struct EEGArtifactV4 {
+    char version[20] = "EEGArtifactV4";
+    int channel;
+    int numSamples;
+    char label[255];
+    float sampleStart;
+    float sampleEnd;
+    float artStart;
+    float artEnd;
+    short recDuration; 
+    EDF_SIGNAL signalMetadata;
 } artheader;
 
 class EDFSignal {
@@ -252,7 +265,7 @@ public:
     //      For story EDF-1, all modifcations to startTime and endTime have been moved from
     //      capture-artifact.cpp to this member function.
 
-    int getSegment(short *&dst, bool *&artFlag, EEGArtifactV3 &artHeader, int sigNum, float startTime,
+    int getSegment(short *&dst, bool *&artFlag, EEGArtifactV4 &artHeader, int sigNum, float startTime,
                    float endTime, float windowBuffer) {
 
         int freq = stoi(this->signals[sigNum].numSamples) / stoi(this->header->recDuration);
@@ -297,7 +310,7 @@ public:
         artHeader.artEnd = endTime;
         artHeader.numSamples = endPos - startPos;
         artHeader.channel = sigNum;
-
+        artHeader.recDuration = stoi(this->header->recDuration);
         long numSamples = endPos - startPos;
         dst = (short *) malloc(numSamples * sizeof(short));
         artFlag = (bool *) malloc(numSamples * sizeof(bool));

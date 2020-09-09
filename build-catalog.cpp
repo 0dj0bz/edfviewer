@@ -14,7 +14,7 @@
 // argv[0] - program name (e.g., "build-catalog")
 // argv[1] - fqdn of starting directory (e.g., "/mnt/f5c6f0d4-e553-4895-a955-e0f62ee703f4/tuh_eeg_art_snippets/")
 // output - a line entry to be concatenated to the artifact catalog
-// <label>\t<electrode config>\t<fq .art filename>
+// <label>\t<electrode config>\t<fq .art filename>\t<sample start>\t<sample end>\t<digiMin>\t<digiMax>\t<physMin>\t<physMax>
 
 int main(int argc, char **argv)
 {
@@ -32,13 +32,18 @@ int main(int argc, char **argv)
 
     string startDir = argv[1];
 
-    EEGArtifactV3 snippet;
+    EEGArtifactV4 snippet;
 
     FILE *fp = fopen(startDir.c_str(), "rb");
-    fread(&snippet, sizeof(EEGArtifactV3), 1, fp);
+    fread(&snippet, sizeof(EEGArtifactV4), 1, fp);
     fclose(fp);
 
-    std::cout << snippet.label << "\t" << snippet.signalMetadata.label << "\t" << argv[1] << std::endl; 
+    std::cout << snippet.label << "\t" << snippet.signalMetadata.label << "\t" << argv[1] << "\t" << 
+        snippet.sampleStart << "\t" << snippet.sampleEnd << "\t" << 
+        snippet.signalMetadata.numSamples << "\t" << snippet.recDuration << "\t" <<  
+        snippet.signalMetadata.digiMinimum <<
+        "\t" << snippet.signalMetadata.digiMaximum << "\t" << snippet.signalMetadata.physMinimum <<
+        "\t" << snippet.signalMetadata.physMaximum <<std::endl; 
 
     return 0;
 }

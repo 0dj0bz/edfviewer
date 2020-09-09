@@ -46,6 +46,13 @@ int main(int argc, char **argv) {
     std::cout << "----------------------------------------------------------------------------------" << std::endl;
     std::cout << "Opening filename: " << edfsrcfile << std::endl;
 
+    float windowLen;
+
+    if (strcmp("none", artlabel.c_str()) == 0)
+        windowLen = 0.0f;
+    else
+        windowLen = 1.0f;
+
 
     rstudy = new EEGStudy();
     rstudy->loadEDFfile(edfsrcfile, false);
@@ -60,10 +67,9 @@ int main(int argc, char **argv) {
     bool *artFlags;
 
     // data is a short *; getSegment should return the address to the slice of the array containing requested segment of data
-    int numsamples = rstudy->getSegment(data, artFlags, artheader, channel, startpos, endpos, 1.0f);
+    int numsamples = rstudy->getSegment(data, artFlags, artheader, channel, startpos, endpos, windowLen);
 
     strcpy(artheader.label, artlabel.c_str());
-
     //std::cout << "about to invoke copy operator..." << std::endl;
     assign(&artheader.signalMetadata, rstudy->signals[channel]);
     //std::cout << "copy complete!" << std::endl;
@@ -73,7 +79,7 @@ int main(int argc, char **argv) {
 
     FILE *fp = fopen(dstfile.c_str(), "wb");
     // first, write the header
-    fwrite(&artheader, sizeof(EEGArtifactV3), 1, fp);
+    fwrite(&artheader, sizeof(EEGArtifactV4), 1, fp);
     //now write the data, an array of shorts
     fwrite(data, sizeof(short), numsamples, fp);
     //now write the artifact flags
@@ -87,10 +93,10 @@ int main(int argc, char **argv) {
     free(artFlags);
 
     //now let's read it back in to see if it worked
-    EEGArtifactV3 test;
+    EEGArtifactV4 test;
 
     fp = fopen(dstfile.c_str(), "rb");
-    fread(&test, sizeof(EEGArtifactV3), 1, fp);
+    fread(&test, sizeof(EEGArtifactV4), 1, fp);
     short indata[numsamples];
     fread(indata, sizeof(short), numsamples, fp);
     fclose(fp);
