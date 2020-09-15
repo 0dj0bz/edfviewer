@@ -7,7 +7,7 @@
 // OpenGL Graphics includes
 //#include <GL/gl.h>
 //#include <GL/glext.h>
-#include "glew.h"
+#include <GL/glew.h>
 #include <GL/freeglut.h>
 
 #include "edftest.h"
@@ -81,6 +81,11 @@ float g_fAnim = 0.0;
 
 EEGStudy *rstudy;
 
+int channel;
+short * data;
+bool * flags; 
+long numSamples;
+EEGArtifactV4 art_hdr;
 
 unsigned int bufIter = 0;
 
@@ -148,23 +153,20 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 	for (int i=0;i<numElems;i++)
 		vertArry[i] = (float *) malloc(4*sizeof(float*));
 
-	std::cout << "malloc successful!" << std::endl;
+	// std::cout << "malloc successful!" << std::endl;
 
 
-	// TODO :
-	// Apparently I have somehow put a map inside of a map when creating the
-	// signals component of the EDFStudy data structure. Need to fix this.
 
-	std::cout << "max: " << rstudy->signals[0][0].digiMaximum << " min: " << rstudy->signals[0][0].digiMinimum << std::endl;
+	// std::cout << "max: " << rstudy->signals[channel].digiMaximum << " min: " << rstudy->signals[channel].digiMinimum << std::endl;
 
 	for (int j=0;j<numElems;j++)
 	{
 		// std::cout << "j: " << j << std::endl;
 		vertArry[j][0] = ((float)(j<numElems?j-(numElems/2):j+(numElems/2))/((float)numElems/2));//(float)mesh_width))/(float)mesh_width;
-		vertArry[j][1] = (float) arry[j] / 4096;
+		vertArry[j][1] = (float) arry[j] / (stof(rstudy->signals[channel].physMaximum)-stof(rstudy->signals[channel].physMinimum)) ;
 		vertArry[j][2] = 0.0f;
 		vertArry[j][3] = 1.0f;
-		std::cout << "j: " << j << " vertArry (x,y): (" << vertArry[j][0] << ", " << vertArry[j][1] << ")" << std::endl;
+		// std::cout << "j: " << j << " vertArry (x,y): (" << vertArry[j][0] << ", " << vertArry[j][1] << ")" << std::endl;
 	}
 
 	return vertArry;
@@ -181,61 +183,34 @@ void display()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// float **d = makeVertices(&rstudy->signalData->data[0][256+bufIter], 30, numVertices);
-
-	// GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
-
-	// for (int i=0;i<numVertices;i++)
-	// 	for (int j=0;j<4;j++)
-	// 	{
-	// 		dpoints[(i*4)+j] = d[i][j];
-	// 	}
-
-	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
-	// glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
-
 	short * selection;
-	int numSamples = rstudy->getSegment(&selection, 0, g_fAnim+0.0, g_fAnim+3.0);
+	bool * flags;
+	EEGArtifactV4 art_hdr;
+	
+//	int numSamples = rstudy->getSegment(selection, flags, art_hdr, 2, g_fAnim+0.0, g_fAnim+3.0, 0.0f);
 
-	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
-	float **d = makeVertices(selection, 30, numVertices);
+	float **d = makeVertices(data, channel, numSamples);
 
-	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+	GLfloat *dpoints = (GLfloat*)malloc(numSamples*4*sizeof(GLfloat));
 
-	for (int i=0;i<numVertices;i++)
+	for (int i=0;i<numSamples;i++)
 		for (int j=0;j<4;j++)
 		{
 			dpoints[(i*4)+j] = d[i][j];
 		}
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numSamples*4*sizeof(GLfloat), dpoints);
 
-	glViewport(0, 0, window_width, window_height*0.5f);
-	glDrawArrays(GL_LINE_STRIP, 0, numVertices);
-
-
-
-	// d = makeVertices(&rstudy->signalData->data[1][256+bufIter], 30, numVertices);
-
-	// GLfloat *dpoints2 = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
-
-	// for (int i=0;i<numVertices;i++)
-	// 	for (int j=0;j<4;j++)
-	// 	{
-	// 		dpoints2[(i*4)+j] = d[i][j];
-	// 	}
-
-	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints2);
-
-	// glViewport(0, window_height*0.5f, window_width, (window_height*0.5f));
-	// glDrawArrays(GL_LINE_STRIP, 0, numVertices);
+	glViewport(0, 0, window_width, window_height);
+	glDrawArrays(GL_LINE_STRIP, 0, numSamples);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
 
 	bufIter++;
 
- 	g_fAnim += 0.001f;
+ 	g_fAnim += 0.1f;
+
 }
 
 
@@ -252,20 +227,22 @@ void createVBO(void)
 
 
 	short * selection;
-	int numSamples = rstudy->getSegment(&selection, 0, 0.0, 3.0);
+	bool * flags;
+	EEGArtifactV4 art_hdr;
 
-	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
-	float **d = makeVertices(selection, 30, numVertices);
+//	int numSamples = rstudy->getSegment(selection, flags, art_hdr, 2, 0.0, 3.0, 0.0f);
 
-	GLfloat *dpoints = (GLfloat*)malloc(numVertices*4*sizeof(GLfloat));
+	float **d = makeVertices(data, channel, numSamples);
 
-	for (int i=0;i<numVertices;i++)
+	GLfloat *dpoints = (GLfloat*)malloc(numSamples*4*sizeof(GLfloat));
+
+	for (int i=0;i<numSamples;i++)
 		for (int j=0;j<4;j++)
 		{
 			dpoints[(i*4)+j] = d[i][j];
 		}
 
-	glBufferData(GL_ARRAY_BUFFER, numVertices*4*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numSamples*4*sizeof(GLfloat), dpoints, GL_STATIC_DRAW);
 
 	errorCheckValue = glGetError();
 
@@ -488,7 +465,7 @@ void createShaders()
 		glGetProgramResourceiv(vs_program, GL_PROGRAM_INPUT, i, 2, props, 2, NULL, params);
 
 		
-		printf("Index %d %s @ location %d \n", i, name, params[1]);
+		printf("createShaders: Index %d %s @ location %d \n", i, name, params[1]);
 
 	}
 }
@@ -646,20 +623,25 @@ bool initGL(int *argc, char **argv)
 int main(int argc, char **argv)
 {
 
-	// string filename = "00000000_s001_t000.edf";
-
-	if (argc < 2)
+	if (argc < 4)
 	{
-		std::cout << "ERROR - must supply artifact snippet." << std::endl;
+		std::cout << "ERROR - missing parameters." << std::endl;
+		std::cout << "Usage: view-snippet <edffile> <channel> <startTime> <endTime>" << std::endl;
 		std::cout << "Aborting..." << std::endl;
 		exit(-1);
 	}
 
+	fqdn_dst = argv[1];
+
+	channel = stoi(argv[2]);
+	float startPos = stof(argv[3]);
+	float endPos = stof(argv[4]);
+
 	std::cout << "Opening filename: " << fqdn_dst << std::endl;
 
-
-	rstudy = loadEDFfile(fqdn_dst, false);
-
+	rstudy = new EEGStudy();
+	
+	rstudy->loadEDFfile(fqdn_dst, false);
 
 	if (rstudy == NULL)
 	{
@@ -669,26 +651,25 @@ int main(int argc, char **argv)
 
 	std::cout << "Inside main..." << std::endl;
 	
-	// for (int j=0;j<stoi(rstudy->header->numSignals);j++)
-	//     for (int i=0;i<stoi(rstudy->header->numDataRecs);i++)
-	//     	cout << "Signal[" << j << "] Data Record[" << i << "]\t - " << rstudy->signalData->data[j][i] << endl;
+	printf("%s starting...\n", appString);
 
-    printf("%s starting...\n", appString);
-
-    printf("\n");
+	printf("\n");
 
 
-    // First initialize OpenGL context, so we can properly set the GL for CUDA.
-    // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
-    if (false == initGL(&argc, argv))
-    {
-        return -1;
-    }
+	numSamples = rstudy->getSegment(data, flags, art_hdr, 0, startPos, endPos, 0.0f);
 
-    // start rendering mainloop
-    glutMainLoop();
 
-    printf("%s completed, returned %s\n", appString, (g_errorCount == 0) ? "OK" : "ERROR!");
+	// First initialize OpenGL context, so we can properly set the GL for CUDA.
+	// This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
+	if (false == initGL(&argc, argv))
+	{
+        	return -1;
+	}
 
-    exit(g_errorCount == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
+	// start rendering mainloop
+	glutMainLoop();
+
+	printf("%s completed, returned %s\n", appString, (g_errorCount == 0) ? "OK" : "ERROR!");
+
+	exit(g_errorCount == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }

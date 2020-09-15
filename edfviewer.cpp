@@ -155,7 +155,7 @@ float ** makeVertices(short arry[], int numSignals, int numElems)
 	// Apparently I have somehow put a map inside of a map when creating the
 	// signals component of the EDFStudy data structure. Need to fix this.
 
-	std::cout << "max: " << rstudy->signals[0][0].digiMaximum << " min: " << rstudy->signals[0][0].digiMinimum << std::endl;
+	std::cout << "max: " << rstudy->signals[0].digiMaximum << " min: " << rstudy->signals[0].digiMinimum << std::endl;
 
 	for (int j=0;j<numElems;j++)
 	{
@@ -194,7 +194,11 @@ void display()
 	// glBufferSubData(GL_ARRAY_BUFFER, 0, numVertices*4*sizeof(GLfloat), dpoints);
 	// glUniform1f(glGetUniformLocation(vs_program, "time"), g_fAnim);
 
-	short * selection = rstudy->getSegment(0, g_fAnim+0.0, g_fAnim+3.0);
+	short * selection;
+	bool * flags;
+	EEGArtifactV4 art_hdr;
+
+	rstudy->getSegment(selection, flags, art_hdr, 0, g_fAnim+0.0, g_fAnim+3.0, 0.0f);
 
 	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
 	float **d = makeVertices(selection, 30, numVertices);
@@ -250,7 +254,11 @@ void createVBO(void)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
-	short * selection = rstudy->getSegment(0, 0.0, 3.0);
+	short * selection;
+	bool * flags;
+	EEGArtifactV4 art_hdr;
+
+	rstudy->getSegment(selection, flags, art_hdr, 0, 0.0, 3.0, 0.0f);
 
 	// float **d = makeVertices(&rstudy->signalData->data[0][0], 30, numVertices);
 	float **d = makeVertices(selection, 30, numVertices);
@@ -646,10 +654,13 @@ int main(int argc, char **argv)
 
 	// string filename = "00000000_s001_t000.edf";
 
+	fqdn_dst = argv[1];
+
 	std::cout << "Opening filename: " << fqdn_dst << std::endl;
 
-
-	rstudy = loadEDFfile(fqdn_dst, false);
+	EEGStudy * rstudy;
+	rstudy = new EEGStudy();
+	rstudy->loadEDFfile(fqdn_dst, false);
 
 
 	if (rstudy == NULL)
